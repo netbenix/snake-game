@@ -14,15 +14,15 @@ int main() {
 
 	for (int i = 0; i < csbi.srWindow.Right - csbi.srWindow.Left; i++) {
 		if (i == 0) {
-			cmdRend.ChangePixel(7, i, CmdRender::PixelType::Hash);
-			cmdRend.ChangePixel(7, i+1, CmdRender::PixelType::Hash);
-			cmdRend.ChangePixel(7, i+2, CmdRender::PixelType::Hash);
+			cmdRend.ChangePixel(7, i, PixelType::Hash, PixelColor::Yellow);
+			cmdRend.ChangePixel(7, i+1, PixelType::Hash, PixelColor::Yellow);
+			cmdRend.ChangePixel(7, i+2, PixelType::Hash, PixelColor::Yellow);
 		}
 			
 
 		if (i > 0) {
-			cmdRend.ChangePixel(7, i-2, CmdRender::PixelType::Blank);
-			cmdRend.ChangePixel(7, i + 2, CmdRender::PixelType::Hash);
+			cmdRend.ChangePixel(7, i-2, PixelType::Blank, PixelColor::Clear);
+			cmdRend.ChangePixel(7, i + 2, PixelType::Hash, PixelColor::Yellow);
 		}
 		cmdRend.RenderScreen();
 		Sleep(16.66667);
