@@ -1,31 +1,47 @@
 #include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
 #include <windows.h>
+#include <thread>
 
 #include "RenderEngine.h"
+#include "SnakeHandler.h"
+
+
+
+/*
+Error Codes:
+
+2 CmdRender not initialized
+3 SnakeHandler not initialized
+
+*/
 
 int main() {
+	CmdRender cmdRend;
+	SnakeHandler snake;
 
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	CmdRender cmdRend;
+	
 	cmdRend.Init(csbi.srWindow.Right - csbi.srWindow.Left, csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
-	cmdRend.RenderScreen();	
-
-	for (int i = 0; i < csbi.srWindow.Right - csbi.srWindow.Left; i++) {
-		if (i == 0) {
-			cmdRend.ChangePixel(7, i, PixelType::Hash, PixelColor::Yellow);
-			cmdRend.ChangePixel(7, i+1, PixelType::Hash, PixelColor::Yellow);
-			cmdRend.ChangePixel(7, i+2, PixelType::Hash, PixelColor::Yellow);
+	snake.Init(cmdRend, csbi.srWindow.Right - csbi.srWindow.Left, csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
+	while (true) {
+		if (GetKeyState(VK_UP) & 0x8000) {
+			snake.MoveUp(cmdRend);
 		}
-			
-
-		if (i > 0) {
-			cmdRend.ChangePixel(7, i-2, PixelType::Blank, PixelColor::Clear);
-			cmdRend.ChangePixel(7, i + 2, PixelType::Hash, PixelColor::Yellow);
+		if (GetKeyState(VK_DOWN) & 0x8000) {
+			snake.MoveDown(cmdRend);
 		}
-		cmdRend.RenderScreen();
+		if (GetKeyState(VK_LEFT) & 0x8000) {
+			snake.MoveLeft(cmdRend);
+		}
+		if (GetKeyState(VK_RIGHT) & 0x8000) {
+			snake.MoveRight(cmdRend);
+		}
+
 		Sleep(16.66667);
 	}
 	return 0;
 }
+

@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <windows.h>
+#include <thread>
 
 #include "RenderEngine.h"
 
@@ -28,14 +29,10 @@ void CmdRender::ShowConsoleCursor(bool showFlag)
 }
 
 int CmdRender::clearScreen() {
-	if (!init) {
-		std::cout << "Renderer not initialized!";
-		return -1;
-	}
+	CheckInit();
 	for (int y = 0; y < sizeY; y++) {
 		for (int x = 0; x < sizeX; x++) {
 			grid[x][y] = ' ';
-			colorGrid[x][y] = PixelColor::Clear;
 		}
 	}
 	return 0;
@@ -44,21 +41,16 @@ int CmdRender::clearScreen() {
 int CmdRender::Init(int sizeX, int sizeY) {
 	CmdRender::sizeX = sizeX;
 	CmdRender::sizeY = sizeY;
-	grid = new char* [sizeX];
-	for (int i = 0; i < sizeX; i++) {
-		grid[i] = new char[sizeY];
+	grid = new char* [CmdRender::sizeX];
+	for (int i = 0; i < CmdRender::sizeX; i++) {
+		grid[i] = new char[CmdRender::sizeY];
 	}
-
-	colorGrid = new PixelColor * [sizeX];
-	for (int i = 0; i < sizeX; i++) {
-		colorGrid[i] = new PixelColor[sizeY];
-	}
-
 	init = true;
 	clearScreen();
 	ShowConsoleCursor(false);
 	return 0;
 }
+
 
 void CmdRender::SetPixelColor(int posX, int posY, PixelColor pixelColor) {
 	int colorCode;
@@ -77,25 +69,24 @@ void CmdRender::SetPixelColor(int posX, int posY, PixelColor pixelColor) {
 	SetConsoleTextAttribute(hConsole, colorCode);
 }
 
-int CmdRender::RenderScreen() {
+void CmdRender::CheckInit() {
 	if (!init) {
 		std::cout << "Renderer not initialized!";
-		return -1;
+		exit(2);
 	}
-	for (int y = 0; y < sizeY; y++) {
-		for (int x = 0; x < sizeX; x++) {
-			setCursorPosition(x, y);
-			SetPixelColor(x, y, colorGrid[x][y]);
-			std::cout << grid[x][y];
-		}
-	}
-	return 0;
 }
 
+void CmdRender::UpdatePixel(int posX, int posY) {
+	setCursorPosition(posX, posY);
+	std::cout << grid[posX][posY];
+}
+
+
 int CmdRender::ChangePixel(int posX, int posY, PixelType pixelType, PixelColor pixelColor) {
-	if (!init) {
-		std::cout << "Renderer not initialized!";
-		return -1;
+	CheckInit();
+
+	if (posY > sizeY) {
+		return 1;
 	}
 
 	char pixel;
@@ -105,21 +96,19 @@ int CmdRender::ChangePixel(int posX, int posY, PixelType pixelType, PixelColor p
 	case (PixelType::Line): {pixel = '|'; break;};
 	case (PixelType::Slash): {pixel = '/'; break;};
 	case (PixelType::Blank): {pixel = ' '; break;};
+	case (PixelType::X): {pixel = 'X'; break;}
 	}
-
-	colorGrid[posX][posY] = pixelColor;
-
+	SetPixelColor(posX, posY, pixelColor);
 	if (pixel != NULL) {
 		grid[posX][posY] = pixel;
 	}
+
+	UpdatePixel(posX, posY);
 	return 0;
 }
 
 PixelType CmdRender::GetPixelType(int posX, int posY) {
-	if (!init) {
-		std::cout << "Renderer not initialized!";
-		return PixelType::Blank;
-	}
+	CheckInit();
 	
 	char pixel = grid[posX][posY];
 	PixelType pixelType;
